@@ -6,7 +6,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const { chromium } = require('playwright');
+const { chromium } = require('playwright-core');  // Changed to playwright-core
 const fs = require('fs');
 const path = require('path');
 const FormData = require('form-data');
@@ -39,7 +39,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN;
 const CHAT_ID = process.env.CHAT_ID;
 
 // ================================================
-// UPDATE SESSION STATUS (MOVED TO TOP LEVEL)
+// UPDATE SESSION STATUS
 // ================================================
 function updateSessionStatus(status, message) {
     loginSession.status = status;
